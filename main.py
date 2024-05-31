@@ -27,11 +27,14 @@ origins = [
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Load the ML model
+
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+
     app.whisper_pipeline = pipeline(
         "automatic-speech-recognition",
         model="openai/whisper-large-v3", # select checkpoint from https://huggingface.co/openai/whisper-large-v3#model-details
-        torch_dtype=torch.float16,
-        device="cuda:0",
+        torch_dtype=torch.float16 if device.startswith("cuda") else torch.float32,
+        device=device,
         model_kwargs={"attn_implementation": "flash_attention_2"} if is_flash_attn_2_available() else {"attn_implementation": "sdpa"},
     )
     
@@ -72,7 +75,6 @@ async def transcribe(
     file: UploadFile = File(..., description="Audio file for transcription. In WAV, MP3, AAC, or OGG format"), 
     language: str = Form("EN", pattern="^(?:[A-Za-z]{2}|auto)$", description="Two-letter ISO 639-1 language code or 'auto' for automatic detection."),
     timestamp: bool = Form(False, description="Whether to include timestamps in the transcription."),
-    # metadata: str = Form(None, description="Optional JSON string containing metadata.")
 ):
     """
     Transcribe Audio Endpoint
@@ -86,16 +88,7 @@ async def transcribe(
     Returns:
     A JSON response containing the transcribed text.
     """
-    
-    # metadata_obj = {}
-    # if metadata:
-    #     try:
-    #         metadata_obj = json.loads(metadata)
-    #     except json.JSONDecodeError:
-    #         print("error: Invalid JSON format for metadata.")
-        
-    # user = metadata_obj['user'] if 'user' in metadata_obj.keys() else ''
-    # app_name = metadata_obj['app_name'] if 'app_name' in metadata_obj.keys() else ''
+
     
     extra_args = {
         "chunk_length_s": 30, 
@@ -114,14 +107,6 @@ async def transcribe(
             tmp.flush()
             tmp.seek(0)
             outputs = app.whisper_pipeline(tmp.name, **extra_args)
-
-            # backward compatibility
-            # outputs['transcription'] = outputs['text']
-
-            # background_tasks.add_task(async_log_transcription, 
-            #                           user=user, 
-            #                           app_name=app_name, 
-            #                           transcribed_text=outputs['text'])
             
         return outputs
     
