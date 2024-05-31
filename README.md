@@ -45,8 +45,8 @@ print(response.json())
 1. Clone the repository:
 
 ```bash
-git clone ssh://git@bitbucket-prod.aws.baxter.com:7999/~soniv/whisper_api.git
-cd your-repo
+git clone https://github.com/vikramsoni2/insanely_faster_whisper_api.git
+cd insanely_faster_whisper_api
 ```
 
 2. Create a new virtual environment and activate it:
@@ -67,7 +67,7 @@ pip install -r requirements.txt
 4. Run the FastAPI application:
 
 ```bash
-uvicorn main:app --reload
+python main.py
 ```
 
 The application will be accessible at `http://127.0.0.1:8000`.
