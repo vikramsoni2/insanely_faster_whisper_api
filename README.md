@@ -1,8 +1,14 @@
 # FastAPI Insanely Faster Whisper Transcription
 
+![Insanely Faster Whisper](./static/screenshot.png)
+
+![Insanely Faster Whisper](./static/screenshot2.png)
+
 ## Overview
 
 This is a simple Python project that leverages the FastAPI framework and the Insanely Faster Whisper model for efficient and fast audio transcription. The project utilizes Flash Attention for improved performance in transcription tasks.
+
+
 
 ## Requirements
 
