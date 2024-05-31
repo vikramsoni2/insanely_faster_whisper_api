@@ -2,6 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, File, UploadFile, Query, Request, Response, Form, BackgroundTasks
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 import torch, torchaudio, io
 from transformers import pipeline
 from transformers.utils import is_flash_attn_2_available
@@ -9,6 +11,7 @@ import traceback
 from tempfile import NamedTemporaryFile
 import json
 import uvicorn
+import os
 
 
 description = """
@@ -58,6 +61,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/")
+async def read_index():
+    return FileResponse(os.path.join("static", "index.html"))
 
 
 @app.get("/health")
